@@ -55,7 +55,7 @@
 1. Finalmente, podemos executar o container, com o comando `runc run runc` (o nome do container foi automaticamente definido como o nome do diretório, `runc`). Como resultado, devemos obter um shell root dentro do container:
 
         $ runc run runc
-        # test
+        (root@container)# test
 
 1. O diretório `runc/rootfs` ocupa 301M, e consiste apenas de um sistema mínimo Debian, então não vamos adicioná-lo ao repositório. Para isso vamos voltar ao diretório raiz, e adicionar uma regra ao `.gitignore` deste repositório, assim como criar um arquivo shell que realiza a instalação do container.
 
@@ -120,11 +120,11 @@
             $ cat > Dockerfile << EOF
             FROM scratch
             ADD rootfs /
-            CMD ["/bin/sh"]
+            CMD ["/bin/bash"]
 
         - A primeira linha, `FROM scratch` especifica que a imagem começa com sistema de arquivos vazio.
         - A segunda, `ADD rootfs /` adiciona o diretório contendo um sistema de arquivos contendo Debian, montado no diretório `/` da imagem
-        - A terceira, `CMD ["/bin/sh"]` especifica que o comando em aspas deve ser executado na inicialização do container
+        - A terceira, `CMD ["/bin/bash"]` especifica que o comando em aspas deve ser executado na inicialização do container
 
     - Agora podemos executar `docker build` para criar uma imagem com o título desejado:
             
@@ -133,7 +133,7 @@
     - E executar a imagem criada
 
             $ sudo docker run -it tds-debian-build
-            # exit
+            (root@container)# exit
 
 ## Container Podman
 1. Instalando pacote `podman`
@@ -159,7 +159,7 @@
 1. Executando um container Podman qualquer
 
         $ podman run --interactive --tty --rm debian /bin/sh
-        # exit
+        (root@container)# exit
 
     - `podman run` executa um container
     - `--interactive` mantém o STDIN aberto, permitindo interação  
@@ -167,4 +167,14 @@
     - `--rm` automaticamente remove o container ao sair
     - `debian` busca uma imagem chamada "debian" em `docker.io/library` e a executa
     - `/bin/sh` define qual shell executar ao iniciar o container
+
+1. Executar todos os comandos com `root` tem suas desvantagens, por isso é benéfico configurar um modo _rootless_, que permita com que usuários não privilegiados consigam executar containers. Para isso temos que adicionar o usuário ao grupo chamado `docker`:
+
+        $ sudo usermod -aG $USER docker
+        $ newgrp docker
+
+2. E verificar que não é necessário `sudo` para executar a imagem préviamente criada:
+
+        $ docker run -it tds-debian-build
+        (root@container)# exit
 
