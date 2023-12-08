@@ -135,6 +135,16 @@
             $ sudo docker run -it tds-debian-build
             (root@container)# exit
 
+1. Executar todos os comandos com `root` tem suas desvantagens, por isso é benéfico configurar um modo _rootless_, que permita com que usuários não privilegiados consigam executar containers. Para isso temos que adicionar o usuário ao grupo chamado `docker`:
+
+        $ sudo usermod -aG $USER docker
+        $ newgrp docker
+
+1. E verificar que não é necessário `sudo` para executar a imagem préviamente criada:
+
+        $ docker run -it tds-debian-build
+        (root@container)# exit
+
 ## Container Podman
 1. Instalando pacote `podman`
 
@@ -168,13 +178,4 @@
     - `debian` busca uma imagem chamada "debian" em `docker.io/library` e a executa
     - `/bin/sh` define qual shell executar ao iniciar o container
 
-1. Executar todos os comandos com `root` tem suas desvantagens, por isso é benéfico configurar um modo _rootless_, que permita com que usuários não privilegiados consigam executar containers. Para isso temos que adicionar o usuário ao grupo chamado `docker`:
-
-        $ sudo usermod -aG $USER docker
-        $ newgrp docker
-
-2. E verificar que não é necessário `sudo` para executar a imagem préviamente criada:
-
-        $ docker run -it tds-debian-build
-        (root@container)# exit
 
