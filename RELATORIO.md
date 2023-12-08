@@ -1,7 +1,7 @@
 # Containers - Trabalho TDS
 
 ## Criação do repositório
-1. Criar epositório remoto, pelo website `https://codeberg.org`
+1. Criar repositório remoto, pelo website `https://codeberg.org`
 
 2. Em máquina local, instalar `git`, com o comando (em Fedora 38):
 
@@ -26,7 +26,7 @@
 
         $ sudo dnf install runc
 
-2. Para configurar o `rootfs`, podemos utilizar a ferramenta `debootstrap`, que instala a base de um sistema debian em um subdiretório de outro sistema já instalado
+2. Para configurar o `rootfs`, podemos utilizar a ferramenta `debootstrap`, que instala a base de um sistema Debian em um subdiretório de outro sistema já instalado
 
         $ sudo dnf install debootstrap
         $ mkdir -p runc/rootfs && cd runc
@@ -59,10 +59,13 @@
 
 5. O diretório `runc/rootfs` ocupa 301M, e consiste apenas de um sistema mínimo Debian, então não vamos adicioná-lo ao repositório. Para isso vamos voltar ao diretório raiz, e adicionar uma regra ao `.gitignore` deste repositório, assim como criar um arquivo shell que realiza a instalação do container.
 
-        $ printf 'runc/config.json\nrunc/rootfs/*\n' >> .gitignore
-        $ printf 'mkdir rootfs &&
+        $ cat >> .gitignore << EOF
+        runc/config.json
+        runc/rootfs/*
+        $ cat >> runc/create.sh << EOF
+        mkdir rootfs &&
         sudo debootstrap stable ./rootfs http://deb.debian.org/debian &&
-        runc spec --rootless \n' > runc/create.sh
+        runc spec --rootless
 
     Agora, para recriar o container RunC basta executar `sh create.sh` no diretório `runc`.
 
