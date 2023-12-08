@@ -1,2 +1,3 @@
 runc/config.json
 runc/rootfs/*
+docker/rootfs/*

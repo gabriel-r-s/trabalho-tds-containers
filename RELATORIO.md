@@ -64,7 +64,7 @@
         runc/rootfs/*
         $ cat >> runc/create.sh << EOF
         mkdir rootfs &&
-        sudo debootstrap stable ./rootfs http://deb.debian.org/debian &&
+        sudo debootstrap stable rootfs http://deb.debian.org/debian &&
         runc spec --rootless
 
     Agora, para recriar o container RunC basta executar `sh create.sh` no diretório `runc`.
@@ -84,6 +84,56 @@
 ## Container LXC
 
 ## Container Docker
+1. Instalando pacote `docker`
+    
+        $ sudo dnf install docker
+
+1. Habilitando e inicializando o serviço `docker`, com `systemctl`
+
+        $ sudo systemctl enable docker
+        created symlink /etc/systemd/system/multi-user.target.wants/docker.service
+        → /usr/lib/systemd/system/docker.service.
+        $ sudo systemctl start docker
+        $ sudo systemctl status docker
+        docker.service - Docker Application Container Engine
+        (...)
+        Active: active (running) since Fri 2023-12-08 15:10:43 -03; 2min 50s ago
+        (...)
+
+1. Agora, podemos buscar e executar imagens do `dockerhub`
+    - Por exemplo, buscando uma imagem Debian:
+    
+            $ sudo docker pull debian
+            $ sudo docker run debian
+
+1. Podemos também criar uma imagem própria, a partir do `docker build`.
+    - Para isso, vamos criar um novo diretório, chamado `docker`, e um subdiretório, chamado `rootfs`
+    
+            $ mkdir -p docker/rootfs && cd docker
+
+    - Utilizar, novamente, `debootstrap` para instalar um sistema Debian no diretório `rootfs`
+
+            $ sudo debootstrap stable rootfs http://deb.debian.org/debian
+
+    - E criar o arquivo `Dockerfile`
+            
+            $ cat > Dockerfile << EOF
+            FROM scratch
+            ADD rootfs /
+            CMD ["/bin/sh"]
+
+        - A primeira linha, `FROM scratch` especifica que a imagem começa com sistema de arquivos vazio.
+        - A segunda, `ADD rootfs /` adiciona o diretório contendo um sistema de arquivos contendo Debian, montado no diretório `/` da imagem
+        - A terceira, `CMD ["/bin/sh"]` especifica que o comando em aspas deve ser executado na inicialização do container
+
+    - Agora podemos executar `docker build` para criar uma imagem com o título desejado:
+            
+            $ sudo docker build -t tds-debian-build .
+
+    - E executar a imagem criada
+
+            $ sudo docker run -it tds-debian-build
+            # exit
 
 ## Container Podman
 1. Instalando pacote `podman`
@@ -106,7 +156,7 @@
          slirp4netns                    x86_64 1.2.2-1.fc38   updates     47 k
          (...)
 
-1. Executando um container podman qualquer
+1. Executando um container Podman qualquer
 
         $ podman run --interactive --tty --rm debian /bin/sh
         # exit
